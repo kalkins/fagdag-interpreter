@@ -1,0 +1,46 @@
+//
+// Created by intellij-pest on 2023-04-24
+// lang
+// Author: sindre
+//
+
+WHITESPACE  = _{ " " | "\t" | "\r" | "\n" }
+
+program     = _{ SOI ~ func* ~ EOI }
+
+type_name   =  { "int" | "bool" | "string" }
+func_name   =  { name }
+var_name    =  { name }
+name        = @{ (ASCII_ALPHANUMERIC | "_" | "-" | ".")+ }
+
+
+func                =  { "function" ~ func_name ~ "(" ~ param_list? ~ ")" ~ ("->" ~ type_name)? ~ block }
+  param_list        =  { type_decl ~ ("," ~ type_decl)* ~ ","? }
+
+  type_decl         =  { var_name ~ ":" ~ type_name }
+
+  block             =  { "{" ~ (ctrl_flow | stmt ~ ";")* ~ "}" }
+    ctrl_flow       =  { if_stmt | while_loop }
+      if_stmt       =  { "if" ~ condition ~ block ~ ("else if" ~ condition)* ~ ("else" ~ block)? }
+      while_loop    =  { "while" ~ condition ~ block }
+      condition     =  { "(" ~ expr ~ ")" }
+
+    stmt            =  { def_var | assignment | return_stmt | expr }
+      def_var       =  { "var" ~ type_decl ~ "=" ~ expr}
+      assignment    =  { var_name ~ "=" ~ expr }
+      return_stmt   =  { "return" ~ expr }
+
+    expr            =  { term ~ (operator ~ term)* }
+      operator      =  { add | subtract }
+        add         =  { "+" }
+        subtract    =  { "-" }
+      term          =  { literal | var_name | func_call | "(" ~ expr ~ ")" }
+        literal     =  { num | str | bool }
+          bool      =  { "true" | "false" }
+          str       =  { "\"" ~ ASCII* ~ "\"" }
+          num       =  { int }
+          int       =  { ("+" | "-")? ~ ASCII_DIGIT+ }
+
+        func_call   = @{ func_name ~ "(" ~ arg_list? ~ ")" }
+          arg_list  = !{ var_name ~ ("," ~ var_name)*  ~ ","? }
+
