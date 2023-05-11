@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 #[derive(Debug, PartialEq)]
 pub struct Program {
     pub nodes: Vec<FunctionNode>
@@ -55,6 +57,16 @@ pub enum Type {
     Int,
     Bool,
     String,
+}
+
+impl Display for Type {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Int => write!(f, "int"),
+            Self::Bool => write!(f, "bool"),
+            Self::String => write!(f, "string"),
+        }
+    }
 }
 
 pub type Ident = String;

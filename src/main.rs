@@ -1,4 +1,5 @@
 mod parser;
+mod vm;
 
 extern crate pest_derive;
 extern crate from_pest;
@@ -7,6 +8,7 @@ extern crate pest;
 use std::{env, fs};
 use std::process::exit;
 use crate::parser::parse;
+use crate::vm::run;
 
 fn print_usage(prog: &str) {
     println!("USAGE: {prog} FILE")
@@ -27,7 +29,14 @@ fn main() {
     };
 
     match parse(&input) {
-        Ok(_) => {}
-        Err(error) => print!("{error}")
+        Ok(program) => {
+            println!("{program:#?}");
+
+            match run(&program) {
+                Ok(return_value) => println!("Program returned {return_value}"),
+                Err(error) => println!("{error}")
+            }
+        }
+        Err(error) => println!("{error}")
     }
 }
