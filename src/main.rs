@@ -1,7 +1,10 @@
 mod parser;
 
+extern crate pest_derive;
+extern crate from_pest;
+extern crate pest;
+
 use std::{env, fs};
-use std::io::{Read, stdin};
 use std::process::exit;
 use crate::parser::parse;
 
@@ -23,5 +26,8 @@ fn main() {
         }
     };
 
-    parse(&input);
+    match parse(&input) {
+        Ok(_) => {}
+        Err(error) => print!("{error}")
+    }
 }
