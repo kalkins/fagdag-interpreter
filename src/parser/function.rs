@@ -35,7 +35,7 @@ impl FromPest<'_> for FunctionParam {
 mod test {
     use super::super::{
         ast::*,
-        tests::helper::*,
+        test::helper::*,
     };
 
     #[test]

@@ -48,7 +48,7 @@ impl FromPest<'_> for BlockNode {
 mod test {
     use super::super::{
         ast::*,
-        tests::helper::*,
+        test::helper::*,
     };
 
     #[test]

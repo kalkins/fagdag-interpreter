@@ -82,7 +82,7 @@ impl FromPest<'_> for BinaryVerb {
 mod test {
     use super::super::{
         ast::*,
-        tests::helper::*,
+        test::helper::*,
     };
 
     #[test]

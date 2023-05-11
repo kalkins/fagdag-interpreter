@@ -25,7 +25,7 @@ impl TryFrom<&mut Pairs<'_, Rule>> for Program {
 #[cfg(test)]
 mod test {
     use super::super::{
-        tests::helper::*,
+        test::helper::*,
     };
 
     #[test]

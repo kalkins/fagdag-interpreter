@@ -10,7 +10,7 @@ mod error;
 mod utils;
 
 #[cfg(test)]
-mod tests;
+mod test;
 
 use pest::Parser;
 use pest_derive::Parser;
