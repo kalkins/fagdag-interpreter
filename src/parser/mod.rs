@@ -1,15 +1,16 @@
-#[cfg(test)]
-mod tests;
+pub mod ast;
 mod function;
 mod common;
 mod block;
 mod expression;
-mod ast;
 mod rule;
 mod from_pest;
 mod program;
 mod error;
 mod utils;
+
+#[cfg(test)]
+mod tests;
 
 use pest::Parser;
 use pest_derive::Parser;
