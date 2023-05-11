@@ -1,46 +1,39 @@
-//
-// Created by intellij-pest on 2023-04-24
-// lang
-// Author: sindre
-//
-
 WHITESPACE  = _{ " " | "\t" | "\r" | "\n" }
 
-program     = _{ SOI ~ func* ~ EOI }
+program     = _{ SOI ~ root* ~ EOI }
 
 type_name   =  { "int" | "bool" | "string" }
-func_name   =  { name }
-var_name    =  { name }
+func_name   = _{ name }
+var_name    = _{ name }
 name        = @{ (ASCII_ALPHANUMERIC | "_" | "-" | ".")+ }
 
 
-func                =  { "function" ~ func_name ~ "(" ~ param_list? ~ ")" ~ ("->" ~ type_name)? ~ block }
-  param_list        =  { type_decl ~ ("," ~ type_decl)* ~ ","? }
+root                    = _{ func }
+  func                  =  { "function" ~ func_name ~ param_list ~ return_type ~ block }
+    param_list          =  { "(" ~ (type_decl ~ ("," ~ type_decl)* ~ ","?)? ~ ")" }
+    return_type         = _{ ("->" ~ type_name)? }
 
-  type_decl         =  { var_name ~ ":" ~ type_name }
+    type_decl           =  { var_name ~ ":" ~ type_name }
 
-  block             =  { "{" ~ (ctrl_flow | stmt ~ ";")* ~ "}" }
-    ctrl_flow       =  { if_stmt | while_loop }
-      if_stmt       =  { "if" ~ condition ~ block ~ ("else if" ~ condition)* ~ ("else" ~ block)? }
-      while_loop    =  { "while" ~ condition ~ block }
-      condition     =  { "(" ~ expr ~ ")" }
+    block               =  { "{" ~ (stmt ~ ";")* ~ "}" }
+      stmt              = _{ def_var | assignment | return_stmt | expr }
+        def_var         =  { "var" ~ type_decl ~ "=" ~ expr}
+        assignment      =  { var_name ~ "=" ~ expr }
+        return_stmt     =  { "return" ~ expr }
 
-    stmt            =  { def_var | assignment | return_stmt | expr }
-      def_var       =  { "var" ~ type_decl ~ "=" ~ expr}
-      assignment    =  { var_name ~ "=" ~ expr }
-      return_stmt   =  { "return" ~ expr }
-
-    expr            =  { term ~ (operator ~ term)* }
-      operator      =  { add | subtract }
-        add         =  { "+" }
-        subtract    =  { "-" }
-      term          =  { literal | var_name | func_call | "(" ~ expr ~ ")" }
-        literal     =  { num | str | bool }
-          bool      =  { "true" | "false" }
-          str       =  { "\"" ~ ASCII* ~ "\"" }
-          num       =  { int }
-          int       =  { ("+" | "-")? ~ ASCII_DIGIT+ }
-
-        func_call   = @{ func_name ~ "(" ~ arg_list? ~ ")" }
-          arg_list  = !{ var_name ~ ("," ~ var_name)*  ~ ","? }
-
+      expr              = _{ binary_op | term }
+        binary_op       =  { term ~ binary_verb ~ term }
+          binary_verb   = _{ add | subtract | compare }
+            add         =  { "+" }
+            subtract    =  { "-" }
+            compare     =  { "==" }
+        term            = _{ "(" ~ expr ~ ")" | literal | var_name }
+          literal       = _{ num | str | bool }
+            bool        =  { "true" | "false" }
+            num         = _{ int }
+            int         = @{ ("+" | "-")? ~ ASCII_DIGIT+ }
+            str         = ${ "\"" ~ inner_str ~ "\"" }
+              inner_str = @{ char* }
+                char    =  {
+                    !("\"" | "\\") ~ ANY
+                }
