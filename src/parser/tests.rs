@@ -1,6 +1,6 @@
 pub mod helper {
-    use crate::parser::parse;
-    use crate::parser::ast::{BlockNode, Program, RootNode};
+    use super::super::parse;
+    use super::super::ast::{BlockNode, Program, RootNode};
 
     /// Parse the input text to a program, and panic on errors.
     ///

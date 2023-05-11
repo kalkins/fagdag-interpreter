@@ -1,6 +1,6 @@
 use pest::iterators::Pair;
-use crate::parser::error::ParseError;
-use crate::parser::Rule;
+use super::error::ParseError;
+use super::Rule;
 
 pub trait FromPest<'pest>: Sized {
     fn from_pest(pair: Pair<'pest, Rule>) -> Result<Self, ParseError>;

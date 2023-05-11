@@ -1,9 +1,9 @@
 use pest::iterators::{Pair, Pairs};
-use crate::parser::ast::{Program, RootNode};
-use crate::parser::error::ParseError;
-use crate::parser::from_pest::{FromPest, ParsePest};
-use crate::parser::Rule;
-use crate::parser::utils::{parse_next, parse_next_option};
+use super::ast::{Program, RootNode};
+use super::error::ParseError;
+use super::from_pest::{FromPest, ParsePest};
+use super::Rule;
+use super::utils::{parse_next, parse_next_option};
 
 impl TryFrom<&mut Pairs<'_, Rule>> for Program {
     type Error = ParseError;

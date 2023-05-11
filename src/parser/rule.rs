@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Display, Formatter};
-use crate::parser::Rule;
+use super::Rule;
 
 impl Display for Rule {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

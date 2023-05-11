@@ -1,9 +1,9 @@
 use pest::iterators::Pair;
-use crate::parser::ast::{BinaryVerb, ExpressionNode, TermNode};
-use crate::parser::error::ParseError;
-use crate::parser::from_pest::{FromPest, ParsePest};
-use crate::parser::Rule;
-use crate::parser::utils::{map_next, parse_next};
+use super::ast::{BinaryVerb, ExpressionNode, TermNode};
+use super::error::ParseError;
+use super::from_pest::{FromPest, ParsePest};
+use super::Rule;
+use super::utils::{map_next, parse_next};
 
 impl FromPest<'_> for ExpressionNode {
     fn from_pest(pair: Pair<'_, Rule>) -> Result<Self, ParseError> {

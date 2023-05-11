@@ -1,9 +1,9 @@
 use pest::iterators::Pair;
-use crate::parser::ast::BlockNode;
-use crate::parser::error::ParseError;
-use crate::parser::from_pest::FromPest;
-use crate::parser::Rule;
-use crate::parser::utils::parse_next;
+use super::ast::BlockNode;
+use super::error::ParseError;
+use super::from_pest::FromPest;
+use super::Rule;
+use super::utils::parse_next;
 
 impl FromPest<'_> for BlockNode {
     fn from_pest(pair: Pair<'_, Rule>) -> Result<Self, ParseError> {

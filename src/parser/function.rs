@@ -1,8 +1,8 @@
 use pest::iterators::Pair;
-use crate::parser::ast::FunctionParam;
-use crate::parser::error::ParseError;
-use crate::parser::from_pest::{FromPest, ParsePest};
-use crate::parser::Rule;
+use super::ast::FunctionParam;
+use super::error::ParseError;
+use super::from_pest::{FromPest, ParsePest};
+use super::Rule;
 
 impl FromPest<'_> for FunctionParam {
     fn from_pest(pair: Pair<'_, Rule>) -> Result<Self, ParseError> {

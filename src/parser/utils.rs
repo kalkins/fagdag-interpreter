@@ -1,7 +1,7 @@
 use pest::iterators::{Pair, Pairs};
-use crate::parser::error::ParseError;
-use crate::parser::from_pest::{FromPest, ParsePest};
-use crate::parser::Rule;
+use super::error::ParseError;
+use super::from_pest::{FromPest, ParsePest};
+use super::Rule;
 
 #[track_caller]
 pub fn parse_next<'pest, T: FromPest<'pest>>(inner: &mut Pairs<'pest, Rule>, parent: &Pair<'pest, Rule>) -> Result<T, ParseError> {

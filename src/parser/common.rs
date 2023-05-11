@@ -1,9 +1,9 @@
 use pest::iterators::Pair;
-use crate::parser::ast::{Type, Ident};
-use crate::parser::error::ParseError;
-use crate::parser::from_pest::{FromPest, ParsePest};
-use crate::parser::Rule;
-use crate::parser::utils::parse_next;
+use super::ast::{Type, Ident};
+use super::error::ParseError;
+use super::from_pest::{FromPest, ParsePest};
+use super::Rule;
+use super::utils::parse_next;
 
 impl FromPest<'_> for Type {
     #[track_caller]

@@ -13,7 +13,7 @@ mod utils;
 
 use pest::Parser;
 use pest_derive::Parser;
-use crate::parser::ast::Program;
+use self::ast::Program;
 
 #[derive(Parser)]
 #[grammar = "kwlang.pest"]
