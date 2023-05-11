@@ -1,6 +1,8 @@
 pub mod helper {
-    use super::super::parse;
-    use super::super::ast::{BlockNode, Program, FunctionNode};
+    use super::super::{
+        parse,
+        ast::*,
+    };
 
     /// Parse the input text to a program, and panic on errors.
     ///

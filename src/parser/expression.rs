@@ -80,8 +80,10 @@ impl FromPest<'_> for BinaryVerb {
 
 #[cfg(test)]
 mod test {
-    use crate::parser::ast::*;
-    use crate::parser::tests::helper::*;
+    use super::super::{
+        ast::*,
+        tests::helper::*,
+    };
 
     #[test]
     fn test_expr_addition() {

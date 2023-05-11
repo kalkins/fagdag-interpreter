@@ -24,7 +24,9 @@ impl TryFrom<&mut Pairs<'_, Rule>> for Program {
 
 #[cfg(test)]
 mod test {
-    use crate::parser::tests::helper::parse_helper;
+    use super::super::{
+        tests::helper::*,
+    };
 
     #[test]
     fn test_empty_program() {
