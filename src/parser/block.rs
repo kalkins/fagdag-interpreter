@@ -43,3 +43,69 @@ impl FromPest<'_> for BlockNode {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::parser::ast::*;
+    use crate::parser::tests::helper::*;
+
+    #[test]
+    fn test_variable_def() {
+        let nodes = parse_block("var x: int = 5;");
+
+        let expected = vec![
+            BlockNode::VariableDefinition {
+                name: "x".into(),
+                type_name: Type::Int,
+                value: ExpressionNode::Term(
+                    TermNode::Integer(5)
+                )
+            }
+        ];
+
+        assert_eq!(nodes, expected);
+    }
+
+    #[test]
+    fn test_assignment() {
+        let nodes = parse_block("
+            var x: int = 5;
+            x = 9;
+        ");
+
+        let expected = vec![
+            BlockNode::VariableDefinition {
+                name: "x".into(),
+                type_name: Type::Int,
+                value: ExpressionNode::Term(
+                    TermNode::Integer(5)
+                )
+            },
+            BlockNode::Assignment {
+                lhs: "x".into(),
+                rhs: ExpressionNode::Term(
+                    TermNode::Integer(9)
+                )
+            }
+        ];
+
+        assert_eq!(nodes, expected);
+    }
+
+    #[test]
+    fn test_return() {
+        let nodes = parse_block("
+            return 5;
+        ");
+
+        let expected = vec![
+            BlockNode::Return(
+                ExpressionNode::Term(
+                    TermNode::Integer(5)
+                )
+            ),
+        ];
+
+        assert_eq!(nodes, expected);
+    }
+}

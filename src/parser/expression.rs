@@ -77,3 +77,113 @@ impl FromPest<'_> for BinaryVerb {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::parser::ast::*;
+    use crate::parser::tests::helper::*;
+
+    #[test]
+    fn test_expr_addition() {
+        let nodes = parse_block("
+            +5;
+            (9 + x) + 8;
+        ");
+
+        let expected = vec![
+            BlockNode::Expression(
+                ExpressionNode::Term(
+                    TermNode::Integer(5)
+                )
+            ),
+            BlockNode::Expression (
+                ExpressionNode::BinaryOperation {
+                    verb: BinaryVerb::Plus,
+                    lhs: ExpressionNode::BinaryOperation {
+                        verb: BinaryVerb::Plus,
+                        lhs: ExpressionNode::Term(
+                            TermNode::Integer(9)
+                        ).into(),
+                        rhs: ExpressionNode::Term(
+                            TermNode::Variable("x".into())
+                        ).into(),
+                    }.into(),
+                    rhs: ExpressionNode::Term(
+                        TermNode::Integer(8)
+                    ).into()
+                }
+            ),
+        ];
+
+        assert_eq!(nodes, expected);
+    }
+
+    #[test]
+    fn test_negative_int() {
+        let nodes = parse_block("
+            -5;
+            -4 - -2;
+        ");
+
+        let expected = vec![
+            BlockNode::Expression(
+                ExpressionNode::Term(
+                    TermNode::Integer(-5)
+                )
+            ),
+            BlockNode::Expression(
+                ExpressionNode::BinaryOperation {
+                    verb: BinaryVerb::Minus,
+                    lhs: ExpressionNode::Term(
+                        TermNode::Integer(-4)
+                    ).into(),
+                    rhs: ExpressionNode::Term(
+                        TermNode::Integer(-2)
+                    ).into(),
+                }
+            ),
+        ];
+
+        assert_eq!(nodes, expected);
+    }
+
+    #[test]
+    fn test_string() {
+        let nodes = parse_block("
+            \"This is a test\";
+        ");
+
+        let expected = vec![
+            BlockNode::Expression(
+                ExpressionNode::Term(
+                    TermNode::String("This is a test".into())
+                )
+            ),
+        ];
+
+        assert_eq!(nodes, expected);
+    }
+
+    #[test]
+    fn test_bool() {
+        let nodes = parse_block("
+            true;
+            false;
+        ");
+
+        let expected = vec![
+            BlockNode::Expression(
+                ExpressionNode::Term(
+                    TermNode::Boolean(true)
+                )
+            ),
+            BlockNode::Expression(
+                ExpressionNode::Term(
+                    TermNode::Boolean(false)
+                )
+            ),
+        ];
+
+        assert_eq!(nodes, expected);
+    }
+}

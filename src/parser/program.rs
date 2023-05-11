@@ -41,3 +41,69 @@ impl FromPest<'_> for RootNode {
     }
 }
 
+#[cfg(test)]
+mod test {
+    use crate::parser::ast::*;
+    use crate::parser::tests::helper::parse_helper;
+
+    #[test]
+    fn test_empty_program() {
+        let program = parse_helper("");
+
+        assert_eq!(program.nodes.len(), 0);
+    }
+
+    #[test]
+    fn test_function_simple() {
+        let ast = parse_helper("function test() {}");
+
+        let expected = RootNode::Function {
+            name: "test".into(),
+            parameters: vec![],
+            return_type: None,
+            block: vec![],
+        };
+
+        assert_eq!(ast.nodes.len(), 1);
+        assert_eq!(ast.nodes[0], expected);
+    }
+
+    #[test]
+    fn test_function_params() {
+        let ast = parse_helper("function test(x: int, y: string) {}");
+
+        let expected = RootNode::Function {
+            name: "test".into(),
+            parameters: vec![
+                FunctionParam {
+                    name: "x".into(),
+                    type_name: Type::Int,
+                },
+                FunctionParam {
+                    name: "y".into(),
+                    type_name: Type::String,
+                }
+            ],
+            return_type: None,
+            block: vec![],
+        };
+
+        assert_eq!(ast.nodes.len(), 1);
+        assert_eq!(ast.nodes[0], expected);
+    }
+
+    #[test]
+    fn test_function_return_type() {
+        let ast = parse_helper("function test() -> string {}");
+
+        let expected = RootNode::Function {
+            name: "test".into(),
+            parameters: vec![],
+            return_type: Some(Type::String),
+            block: vec![],
+        };
+
+        assert_eq!(ast.nodes.len(), 1);
+        assert_eq!(ast.nodes[0], expected);
+    }
+}
