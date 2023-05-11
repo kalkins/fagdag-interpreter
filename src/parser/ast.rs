@@ -57,13 +57,4 @@ pub enum Type {
     String,
 }
 
-#[derive(Debug, PartialEq)]
-pub struct Ident {
-    name: String
-}
-
-impl<T: ToString> From<T> for Ident {
-    fn from(value: T) -> Self {
-        Ident { name: value.to_string() }
-    }
-}
+pub type Ident = String;
