@@ -34,6 +34,11 @@ impl FromPest<'_> for BlockNode {
                 let mut inner = pair.clone().into_inner();
                 Ok(BlockNode::Return(parse_next(&mut inner, &pair)?))
             },
+            Rule::expr_stmt => {
+                let mut inner = pair.clone().into_inner();
+
+                Ok(BlockNode::Expression(parse_next(&mut inner, &pair)?))
+            }
             rule => Err(ParseError::wrong_rule(&pair, rule))
         }
     }
