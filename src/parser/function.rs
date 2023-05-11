@@ -91,4 +91,23 @@ mod test {
         assert_eq!(ast.nodes.len(), 1);
         assert_eq!(ast.nodes[0], expected);
     }
+
+    #[test]
+    fn test_function_return_type_with_block() {
+        let ast = parse_helper("function test() -> string { return 5; }");
+
+        let expected = FunctionNode {
+            name: "test".into(),
+            parameters: vec![],
+            return_type: Some(Type::String),
+            block: vec![
+                BlockNode::Return(
+                    ExpressionNode::Term(TermNode::Integer(5))
+                )
+            ],
+        };
+
+        assert_eq!(ast.nodes.len(), 1);
+        assert_eq!(ast.nodes[0], expected);
+    }
 }

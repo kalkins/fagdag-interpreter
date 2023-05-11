@@ -18,7 +18,10 @@ pub fn map_next<'pest, T, F>(inner: &mut Pairs<'pest, Rule>, parent: &Pair<'pest
 #[track_caller]
 pub fn parse_next_option<'pest, T: FromPest<'pest>>(inner: &mut Pairs<'pest, Rule>) -> Result<Option<T>, ParseError> {
     match inner.peek().map(|p| p.parse()) {
-        Some(Ok(value)) => Ok(Some(value)),
+        Some(Ok(value)) => {
+            inner.next();
+            Ok(Some(value))
+        },
         Some(Err(ParseError::UnexpectedEnd {..} | ParseError::UnexpectedRule {..})) => Ok(None),
         Some(Err(error)) => Err(error),
         None => Ok(None),
