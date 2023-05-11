@@ -1,16 +1,14 @@
 #[derive(Debug, PartialEq)]
 pub struct Program {
-    pub nodes: Vec<RootNode>
+    pub nodes: Vec<FunctionNode>
 }
 
 #[derive(Debug, PartialEq)]
-pub enum RootNode {
-    Function {
-        name: Ident,
-        parameters: Vec<FunctionParam>,
-        return_type: Option<Type>,
-        block: Vec<BlockNode>,
-    },
+pub struct FunctionNode {
+    pub name: Ident,
+    pub parameters: Vec<FunctionParam>,
+    pub return_type: Option<Type>,
+    pub block: Vec<BlockNode>,
 }
 
 #[derive(Debug, PartialEq)]

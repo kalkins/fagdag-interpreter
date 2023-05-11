@@ -1,6 +1,6 @@
 pub mod helper {
     use super::super::parse;
-    use super::super::ast::{BlockNode, Program, RootNode};
+    use super::super::ast::{BlockNode, Program, FunctionNode};
 
     /// Parse the input text to a program, and panic on errors.
     ///
@@ -26,7 +26,7 @@ pub mod helper {
 
         assert_eq!(nodes.len(), 1);
 
-        if let Some(RootNode::Function {block, .. }) = nodes.pop() {
+        if let Some(FunctionNode {block, .. }) = nodes.pop() {
             block
         } else {
             panic!()
