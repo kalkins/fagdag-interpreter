@@ -30,12 +30,20 @@ pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -
         for node in &function.block {
             match node {
                 BlockNode::VariableDefinition { name, type_name, value } => {
-                    todo!()
+                    let value = run_expression(value, &scope)?;
+
+                    if &value.ast_type() == type_name {
+                        scope.add_variable(name, value);
+                    } else {
+                        Err(format!("Invalid type {} assigned to variable {}", value.ast_type(), name))?;
+                    }
                 },
                 BlockNode::Assignment { lhs, rhs } => {
                    todo!()
                 },
-                BlockNode::Expression(expr) => run_expression(expr, &scope)?,
+                BlockNode::Expression(expr) => {
+                    run_expression(expr, &scope)?;
+                },
                 BlockNode::Return(expr) => {
                     return_value = Some(run_expression(expr, &scope)?);
                     break;
@@ -240,7 +248,7 @@ mod test {
             &FunctionNode {
                 name: "test".into(),
                 parameters: vec![],
-                return_type: Some(Type::Bool),
+                return_type: Some(Type::Int),
                 block: vec![
                     BlockNode::VariableDefinition {
                         name: "x".into(),
