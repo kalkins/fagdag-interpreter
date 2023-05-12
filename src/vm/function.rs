@@ -262,7 +262,7 @@ mod test {
             &FunctionNode {
                 name: "test".into(),
                 parameters: vec![],
-                return_type: Some(Type::Bool),
+                return_type: Some(Type::String),
                 block: vec![
                     BlockNode::VariableDefinition {
                         name: "x".into(),
@@ -287,7 +287,7 @@ mod test {
             &FunctionNode {
                 name: "test".into(),
                 parameters: vec![],
-                return_type: Some(Type::Bool),
+                return_type: Some(Type::Int),
                 block: vec![
                     BlockNode::VariableDefinition {
                         name: "x".into(),
