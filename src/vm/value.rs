@@ -16,6 +16,15 @@ impl Value {
             Self::Bool(_) => Type::Bool,
         }
     }
+
+    pub fn str_repr(&self) -> String {
+        match self {
+            Self::String(x) => x.clone(),
+            Self::Int(x) => x.to_string(),
+            Self::Bool(true) => "true".into(),
+            Self::Bool(false) => "false".into(),
+        }
+    }
 }
 
 impl Display for Value {
