@@ -40,7 +40,7 @@ pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -
                     return_value = Some(run_expression(expr, &scope)?);
                     break;
                 }
-            }
+            };
         }
 
         // Handle the return value
@@ -230,5 +230,83 @@ mod test {
             &scope,
             vec![],
         ).expect_err("A function should be prohibited from not returning a value when a return type is specified");
+    }
+
+    #[test]
+    fn test_variable_definition() {
+        let scope = Scope::new();
+
+        let result = run_function(
+            &FunctionNode {
+                name: "test".into(),
+                parameters: vec![],
+                return_type: Some(Type::Bool),
+                block: vec![
+                    BlockNode::VariableDefinition {
+                        name: "x".into(),
+                        type_name: Type::Int,
+                        value: ExpressionNode::Term(TermNode::Integer(5)),
+                    },
+                    BlockNode::Return(
+                        ExpressionNode::Term(TermNode::Variable("x".into()))
+                    )
+                ],
+            },
+            &scope,
+            vec![],
+        ).expect("Error while defining simple variable");
+
+        assert_eq!(result, Some(Value::Int(5)));
+
+        run_function(
+            &FunctionNode {
+                name: "test".into(),
+                parameters: vec![],
+                return_type: Some(Type::Bool),
+                block: vec![
+                    BlockNode::VariableDefinition {
+                        name: "x".into(),
+                        type_name: Type::Int,
+                        value: ExpressionNode::Term(TermNode::String("test".into())),
+                    },
+                    BlockNode::Return(
+                        ExpressionNode::Term(TermNode::Variable("x".into()))
+                    )
+                ],
+            },
+            &scope,
+            vec![],
+        ).expect_err("The value of the variable should be required to be int");
+    }
+
+    #[test]
+    fn test_variable_assignment() {
+        let scope = Scope::new();
+
+        let result = run_function(
+            &FunctionNode {
+                name: "test".into(),
+                parameters: vec![],
+                return_type: Some(Type::Bool),
+                block: vec![
+                    BlockNode::VariableDefinition {
+                        name: "x".into(),
+                        type_name: Type::Int,
+                        value: ExpressionNode::Term(TermNode::Integer(3)),
+                    },
+                    BlockNode::Assignment {
+                        lhs: "x".into(),
+                        rhs: ExpressionNode::Term(TermNode::Integer(5)),
+                    },
+                    BlockNode::Return(
+                        ExpressionNode::Term(TermNode::Variable("x".into()))
+                    )
+                ],
+            },
+            &scope,
+            vec![],
+        ).expect("Error with assignment");
+
+        assert_eq!(result, Some(Value::Int(5)));
     }
 }
