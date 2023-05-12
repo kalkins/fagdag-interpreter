@@ -25,4 +25,3 @@ impl<'pest, T: FromPest<'pest>> FromPest<'pest> for Vec<T> {
         )
     }
 }
-
