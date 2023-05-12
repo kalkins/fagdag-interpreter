@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use crate::parser::ast::{BlockNode, FunctionNode};
 use super::expression::run_expression;
 use super::scope::Scope;
@@ -30,12 +32,33 @@ pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -
         for node in &function.block {
             match node {
                 BlockNode::VariableDefinition { name, type_name, value } => {
-                    todo!()
+                    if scope.get_variable(name).is_none() {
+                        let v = run_expression(value, &scope)?;
+                        if v.ast_type() == *type_name {
+                            scope.add_variable(name, v);
+                        }
+                        else {
+                            Err(format!("Invalid variable definition. Mismatch types {} and {}", v.ast_type(), type_name))?;
+                        }
+                    }
+                    else {
+                        Err(format!("Definition of {} shadows previously declared variable", name))?;
+                    }
+                    
                 },
                 BlockNode::Assignment { lhs, rhs } => {
-                   todo!()
+                    let v = scope.get_variable(lhs).ok_or("Hello".to_string())?;
+                    let e = run_expression(rhs, &scope)?;
+                    if e.ast_type() == v.ast_type() {
+                        scope.add_variable(lhs, e);
+                    }
+                    else {
+                        Err(format!("Mismatch in assigment"))?;
+                    }
                 },
-                BlockNode::Expression(expr) => run_expression(expr, &scope)?,
+                BlockNode::Expression(expr) => {
+                    run_expression(expr, &scope)?;
+                },
                 BlockNode::Return(expr) => {
                     return_value = Some(run_expression(expr, &scope)?);
                     break;
@@ -240,7 +263,7 @@ mod test {
             &FunctionNode {
                 name: "test".into(),
                 parameters: vec![],
-                return_type: Some(Type::Bool),
+                return_type: Some(Type::Int),
                 block: vec![
                     BlockNode::VariableDefinition {
                         name: "x".into(),
@@ -287,7 +310,7 @@ mod test {
             &FunctionNode {
                 name: "test".into(),
                 parameters: vec![],
-                return_type: Some(Type::Bool),
+                return_type: Some(Type::Int),
                 block: vec![
                     BlockNode::VariableDefinition {
                         name: "x".into(),
