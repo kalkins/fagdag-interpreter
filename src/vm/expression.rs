@@ -1,11 +1,33 @@
-use crate::parser::ast::{ExpressionNode, TermNode};
+use crate::parser::ast::{ExpressionNode, TermNode, BinaryVerb};
 use super::scope::Scope;
 use super::value::Value;
 
 pub fn run_expression(expr: &ExpressionNode, scope: &Scope) -> Result<Value, String> {
     match expr {
         ExpressionNode::BinaryOperation { verb, lhs, rhs } => {
-            todo!()
+            let lv = run_expression(lhs, scope)?;
+            let rv = run_expression(rhs, scope)?;
+
+            match verb {
+                BinaryVerb::Plus => {
+                    match (lv, rv) {
+                        (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a + b)),
+                        _ => Err("not ints".into())
+                    }
+                },
+                BinaryVerb::Minus => {
+                    match (lv, rv) {
+                        (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a - b)),
+                        _ => Err("not ints".into())
+                    }
+                }
+
+                BinaryVerb::Compare => {
+                    Ok(Value::Bool(lv == rv))
+                }
+
+            }
+            //todo!()
         },
         ExpressionNode::Term(term) => match term {
             TermNode::Variable(var) => {
