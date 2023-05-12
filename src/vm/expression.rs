@@ -1,11 +1,39 @@
-use crate::parser::ast::{ExpressionNode, TermNode};
+use crate::parser::ast::{ExpressionNode, TermNode, BinaryVerb};
 use super::scope::Scope;
 use super::value::Value;
 
 pub fn run_expression(expr: &ExpressionNode, scope: &Scope) -> Result<Value, String> {
     match expr {
         ExpressionNode::BinaryOperation { verb, lhs, rhs } => {
-            todo!()
+            let lhs = run_expression(lhs, scope)?;
+            let rhs = run_expression(rhs, scope)?;
+
+            if lhs.ast_type() != rhs.ast_type() {
+                Err(format!("Different types {} and {} for expression", lhs, rhs))
+            }
+
+            else {
+                match verb {
+                    BinaryVerb::Plus => {
+                        match (&lhs, &rhs) {
+                            (Value::Int(x), Value::Int(y)) => Ok(Value::Int(x+y)),
+                            (Value::String(x), Value::String(y)) => Ok(Value::String(x.clone() + y)),
+                            _ => Err(format!("Can not add {} and {} as they are not the same type", lhs, rhs))
+                        }
+                    },
+                    BinaryVerb::Minus => {
+                        match (&lhs, &rhs) {
+                            (Value::Int(x), Value::Int(y)) => Ok(Value::Int(x-y)),
+                            _ => Err(format!("Can not add {} and {} as they are not ints", lhs, rhs))
+                        }
+                    },
+                    BinaryVerb::Compare => {
+                        Ok(Value::Bool(lhs.to_string() == rhs.to_string()
+                    ))
+                    },
+                }
+            }  
+            
         },
         ExpressionNode::Term(term) => match term {
             TermNode::Variable(var) => {

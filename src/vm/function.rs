@@ -30,12 +30,35 @@ pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -
         for node in &function.block {
             match node {
                 BlockNode::VariableDefinition { name, type_name, value } => {
-                    todo!()
+                    if scope.get_variable(name).is_none() {
+                        let val = run_expression(value, &scope)?;
+                        if val.ast_type() == *type_name {
+                            scope.add_variable(name, val);
+
+                        }
+                        else {
+                            Err(format!("Mismatched types"))?;
+                        }
+                        
+                    }
+                    else {
+                        Err(format!("Shadow"))?;
+                    }
                 },
                 BlockNode::Assignment { lhs, rhs } => {
-                   todo!()
+                    let existing_var = scope.get_variable(lhs).ok_or("Variable doesn't exist")?;
+                    let val = run_expression(rhs, &scope)?;
+                    if existing_var.ast_type() == val.ast_type() {
+                        scope.add_variable(lhs, val);
+
+                    }
+                    else {
+                        Err(format!("Mismatched types"))?;
+                    }
+                        
+     
                 },
-                BlockNode::Expression(expr) => run_expression(expr, &scope)?,
+                BlockNode::Expression(expr) => { run_expression(expr, &scope)?; },
                 BlockNode::Return(expr) => {
                     return_value = Some(run_expression(expr, &scope)?);
                     break;
@@ -240,7 +263,7 @@ mod test {
             &FunctionNode {
                 name: "test".into(),
                 parameters: vec![],
-                return_type: Some(Type::Bool),
+                return_type: Some(Type::Int),
                 block: vec![
                     BlockNode::VariableDefinition {
                         name: "x".into(),
@@ -287,7 +310,7 @@ mod test {
             &FunctionNode {
                 name: "test".into(),
                 parameters: vec![],
-                return_type: Some(Type::Bool),
+                return_type: Some(Type::Int),
                 block: vec![
                     BlockNode::VariableDefinition {
                         name: "x".into(),
