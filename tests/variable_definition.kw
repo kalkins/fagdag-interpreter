@@ -1,6 +1,7 @@
-function main() {
+function main() -> int {
     var x: int = 5;
     var y: int = 2;
-    var z: int = x+y;
+    var z: int = x + y;
+
     return z;
 }

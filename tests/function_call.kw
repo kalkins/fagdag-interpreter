@@ -1,0 +1,11 @@
+function main() -> int {
+    return double(five());
+}
+
+function five() -> int {
+    return 5;
+}
+
+function double(x: int) -> int {
+    return x + x;
+}
