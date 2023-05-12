@@ -1,11 +1,46 @@
-use crate::parser::ast::{ExpressionNode, TermNode};
+use crate::parser::ast::{ExpressionNode, TermNode, BinaryVerb};
 use super::scope::Scope;
 use super::value::Value;
 
 pub fn run_expression(expr: &ExpressionNode, scope: &Scope) -> Result<Value, String> {
     match expr {
         ExpressionNode::BinaryOperation { verb, lhs, rhs } => {
-            todo!()
+            let lhs = run_expression(lhs, scope)?;
+            let rhs = run_expression(rhs, scope)?;
+            
+            if lhs.ast_type() != rhs.ast_type() {
+                Err(format!("Invalid operand types {} and {}", lhs.ast_type(), rhs.ast_type()))
+            }
+            else {
+                match verb {
+                    BinaryVerb::Plus => {
+                        match (&lhs, &rhs) {
+                            (Value::Int(x), Value::Int(y)) => Ok(Value::Int(x + y)),
+                            (Value::String(x), Value::String(y)) => Ok(Value::String(x.clone() + y)),
+                            (Value::Bool(x), Value::Bool(y)) => Ok(Value::Bool(*x && *y)),
+                            _ => Err(format!("Cannot add {} and {}", lhs, rhs))
+                        }
+                    },
+                    BinaryVerb::Minus => {
+                        match (&lhs, &rhs) {
+                        (Value::Int(x), Value::Int(y)) => Ok(Value::Int(x-y)),
+                            // (Value::String(x), Value::String(y)) => Ok(Value::String(x+y))
+                            // (Value::Bool(x), Value::Bool(y)) => Ok(Value::Bool(x+y))
+                            _ => Err(format!("Cannot subtract {} and {}", lhs, rhs))
+                        }
+                    },
+                    BinaryVerb::Compare => {
+                        match (&lhs, &rhs) {
+                            (Value::Int(x), Value::Int(y)) => Ok(Value::Bool(x==y)),
+                            (Value::String(x), Value::String(y)) => Ok(Value::Bool(x==y)),
+                            (Value::Bool(x), Value::Bool(y)) => Ok(Value::Bool(*x && *y)),
+                            _ => Err(format!("Cannot compare {} and {}", lhs, rhs))                        
+                        }
+                    }
+                    _ => Err(format!("Invalid operand"))
+                }
+            }
+
         },
         ExpressionNode::Term(term) => match term {
             TermNode::Variable(var) => {
@@ -26,7 +61,7 @@ mod test {
     use super::super::scope::Scope;
 
     #[test]
-    fn test_addition() {
+    fn test_addition_int() {
         let scope = Scope::new();
 
         let result = run_expression(
@@ -43,6 +78,25 @@ mod test {
         );
 
         assert_eq!(result, Ok(Value::Int(4)));
+    }
+
+    #[test]
+    fn test_addition_string() {
+        let scope = Scope::new();
+        let result = run_expression(
+            &ExpressionNode::BinaryOperation { 
+                verb: BinaryVerb::Plus, 
+                lhs: ExpressionNode::Term(
+                    TermNode::String("Hello".to_string())
+                ).into(), 
+                rhs: ExpressionNode::Term(
+                    TermNode::String("World".to_string())
+                ).into()
+            }, 
+            &scope
+        );
+
+        assert_eq!(result, Ok(Value::String("HelloWorld".to_string())));
     }
 
     #[test]
