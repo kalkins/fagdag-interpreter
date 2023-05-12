@@ -4,7 +4,9 @@ use super::value::Value;
 
 pub fn run_expression(expr: &ExpressionNode, scope: &Scope) -> Result<Value, String> {
     match expr {
-        ExpressionNode::BinaryOperation { .. } => todo!(),
+        ExpressionNode::BinaryOperation { verb, lhs, rhs } => {
+            todo!()
+        },
         ExpressionNode::Term(term) => match term {
             TermNode::Variable(var) => {
                 scope.clone_variable(var).ok_or(format!("No such variable {var}"))

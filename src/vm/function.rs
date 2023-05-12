@@ -29,9 +29,13 @@ pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -
         // Run through each statement
         for node in &function.block {
             match node {
-                BlockNode::VariableDefinition { .. } => todo!(),
-                BlockNode::Assignment { .. } => todo!(),
-                BlockNode::Expression(_) => todo!(),
+                BlockNode::VariableDefinition { name, type_name, value } => {
+                    todo!()
+                },
+                BlockNode::Assignment { lhs, rhs } => {
+                   todo!()
+                },
+                BlockNode::Expression(expr) => run_expression(expr, &scope)?,
                 BlockNode::Return(expr) => {
                     return_value = Some(run_expression(expr, &scope)?);
                     break;
