@@ -27,7 +27,6 @@ pub fn run_expression(expr: &ExpressionNode, scope: &Scope) -> Result<Value, Str
                 }
 
             }
-            //todo!()
         },
         ExpressionNode::Term(term) => match term {
             TermNode::Variable(var) => {

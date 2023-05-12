@@ -30,10 +30,13 @@ pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -
         for node in &function.block {
             match node {
                 BlockNode::VariableDefinition { name, type_name, value } => {
-                    todo!()
-                },
+                    scope.add_variable(name, run_expression(value, &scope)?);
+                    Value::Int(1)
+                }
+,
                 BlockNode::Assignment { lhs, rhs } => {
-                   todo!()
+                    scope.add_variable(lhs, run_expression(rhs, &scope)?);
+                    Value::Int(1)
                 },
                 BlockNode::Expression(expr) => run_expression(expr, &scope)?,
                 BlockNode::Return(expr) => {
