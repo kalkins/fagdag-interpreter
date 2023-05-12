@@ -2,6 +2,7 @@ use crate::parser::ast::{ExpressionNode, TermNode, BinaryVerb};
 use super::scope::Scope;
 use super::value::Value;
 use crate::vm::run_function;
+use itertools::Itertools;
 
 pub fn run_expression(expr: &ExpressionNode, scope: &Scope) -> Result<Value, String> {
     match expr {
@@ -39,12 +40,17 @@ pub fn run_expression(expr: &ExpressionNode, scope: &Scope) -> Result<Value, Str
             TermNode::FnCall(name, params) => {
                 if let Some(fn_node) = scope.get_function(name) {
                     let mut new_scope = Scope::new();
-                    let params = params.iter().map(|el| run_expression(el, &scope).unwrap()).collect();
+                    let (params, errs) : (Vec<_>, Vec<_>) = params.iter().map(|el| run_expression(el, &scope)).into_iter().partition_result();
 
-                    match run_function(&fn_node, &new_scope, params) {
-                        Ok(Some(value)) => Ok(value),
-                        Ok(None) => Ok(Value::Bool(true)),
-                        Err(error) => Err(error)
+                    if errs.is_empty() {
+                        match run_function(&fn_node, &new_scope, params) {
+                            Ok(Some(value)) => Ok(value),
+                            Ok(None) => Ok(Value::Bool(true)),
+                            Err(error) => Err(error)
+                        }
+                    }
+                    else {
+                        Err(errs.join("\n"))
                     }
                 }
                 else {
