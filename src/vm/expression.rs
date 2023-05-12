@@ -1,6 +1,7 @@
 use crate::parser::ast::{ExpressionNode, TermNode, BinaryVerb};
 use super::scope::Scope;
 use super::value::Value;
+use crate::vm::run_function;
 
 pub fn run_expression(expr: &ExpressionNode, scope: &Scope) -> Result<Value, String> {
     match expr {
@@ -35,6 +36,21 @@ pub fn run_expression(expr: &ExpressionNode, scope: &Scope) -> Result<Value, Str
             TermNode::Boolean(x) => Ok(Value::Bool(*x)),
             TermNode::Integer(x) => Ok(Value::Int(*x)),
             TermNode::String(x) => Ok(Value::String(x.clone())),
+            TermNode::FnCall(name, params) => {
+                if let Some(fn_node) = scope.get_function(name) {
+                    let mut new_scope = Scope::new();
+                    let params = params.iter().map(|el| run_expression(el, &scope).unwrap()).collect();
+
+                    match run_function(&fn_node, &new_scope, params) {
+                        Ok(Some(value)) => Ok(value),
+                        Ok(None) => Ok(Value::Bool(true)),
+                        Err(error) => Err(error)
+                    }
+                }
+                else {
+                    Err("Function does not exist!".into())
+                }
+            }
         }
     }
 }

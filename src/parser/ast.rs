@@ -50,6 +50,7 @@ pub enum TermNode {
     Boolean(bool),
     Integer(i32),
     String(String),
+    FnCall(String, Vec<ExpressionNode>),
 }
 
 #[derive(Debug, PartialEq)]

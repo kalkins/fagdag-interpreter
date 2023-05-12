@@ -61,6 +61,18 @@ impl FromPest<'_> for ExpressionNode {
                         )
                     )
                 )
+            },
+
+            Rule::fncall => {
+                let mut inner = pair.clone().into_inner();
+                Ok(
+                    ExpressionNode::Term(
+                        TermNode::FnCall(
+                            parse_next(&mut inner, &pair)?,
+                            parse_next(&mut inner, &pair)?
+                        )
+                    )
+                )
             }
             rule => Err(ParseError::wrong_rule(&pair, rule))
         }

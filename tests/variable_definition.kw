@@ -3,5 +3,6 @@ function main() -> int {
     var y: int = 2;
     var z: int = x + y;
 
-    return z;
+    x = 4 + z;
+    return x;
 }

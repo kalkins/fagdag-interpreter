@@ -28,7 +28,9 @@ root                    = _{ func }
             add         =  { "+" }
             subtract    =  { "-" }
             compare     =  { "==" }
-        term            = _{ "(" ~ expr ~ ")" | literal | var_name }
+        term            = _{ "(" ~ expr ~ ")" | fncall | literal | var_name }
+          fncall        = { func_name ~ params }
+          params        = { "(" ~ expr* ~ ")" }
           literal       = _{ num | str | bool }
             bool        =  { "true" | "false" }
             num         = _{ int }
