@@ -39,6 +39,13 @@ impl FromPest<'_> for BlockNode {
 
                 Ok(BlockNode::Expression(parse_next(&mut inner, &pair)?))
             }
+            Rule::block_stmt => {
+                let mut inner = pair.clone().into_inner();
+
+                Ok(BlockNode::Block(
+                    parse_next(&mut inner, &pair)?
+                ))
+            }
             rule => Err(ParseError::wrong_rule(&pair, rule))
         }
     }
@@ -106,6 +113,40 @@ mod test {
                     TermNode::Integer(5)
                 )
             ),
+        ];
+
+        assert_eq!(nodes, expected);
+    }
+
+    #[test]
+    fn test_nested_block() {
+        let nodes = parse_block("
+            {
+            }
+        ");
+
+        let expected = vec![
+            BlockNode::Block(vec![])
+        ];
+
+        assert_eq!(nodes, expected);
+
+        let nodes = parse_block("
+            {
+                return 5;
+            }
+        ");
+
+        let expected = vec![
+            BlockNode::Block(
+                vec![
+                    BlockNode::Return(
+                        ExpressionNode::Term(
+                            TermNode::Integer(5)
+                        )
+                    ),
+                ]
+            )
         ];
 
         assert_eq!(nodes, expected);

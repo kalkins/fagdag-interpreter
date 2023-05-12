@@ -48,6 +48,7 @@ pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -
                     return_value = Some(run_expression(expr, &scope)?);
                     break;
                 }
+                BlockNode::Block(_) => todo!()
             };
         }
 

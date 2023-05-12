@@ -25,6 +25,7 @@ pub enum BlockNode {
     Assignment { lhs: Ident, rhs: ExpressionNode },
     Expression(ExpressionNode),
     Return(ExpressionNode),
+    Block(Vec<BlockNode>)
 }
 
 #[derive(Debug, PartialEq)]
