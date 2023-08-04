@@ -1,6 +1,5 @@
-use std::fmt::format;
-
 use crate::parser::ast::{BlockNode, FunctionNode};
+use crate::vm::block::run_block;
 use super::expression::run_expression;
 use super::scope::Scope;
 use super::value::Value;
@@ -26,45 +25,7 @@ pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -
             }
         }
 
-        let mut return_value = None;
-
-        // Run through each statement
-        for node in &function.block {
-            match node {
-                BlockNode::VariableDefinition { name, type_name, value } => {
-                    if scope.get_variable(name).is_none() {
-                        let v = run_expression(value, &scope)?;
-                        if v.ast_type() == *type_name {
-                            scope.add_variable(name, v);
-                        }
-                        else {
-                            Err(format!("Invalid variable definition. Mismatch types {} and {}", v.ast_type(), type_name))?;
-                        }
-                    }
-                    else {
-                        Err(format!("Definition of {} shadows previously declared variable", name))?;
-                    }
-                    
-                },
-                BlockNode::Assignment { lhs, rhs } => {
-                    let v = scope.get_variable(lhs).ok_or("Hello".to_string())?;
-                    let e = run_expression(rhs, &scope)?;
-                    if e.ast_type() == v.ast_type() {
-                        scope.add_variable(lhs, e);
-                    }
-                    else {
-                        Err(format!("Mismatch in assigment"))?;
-                    }
-                },
-                BlockNode::Expression(expr) => {
-                    run_expression(expr, &scope)?;
-                },
-                BlockNode::Return(expr) => {
-                    return_value = Some(run_expression(expr, &scope)?);
-                    break;
-                }
-            };
-        }
+        let mut return_value = run_block(&function.block, &scope)?;
 
         // Handle the return value
         if let Some(value) = return_value {
@@ -253,83 +214,5 @@ mod test {
             &scope,
             vec![],
         ).expect_err("A function should be prohibited from not returning a value when a return type is specified");
-    }
-
-    #[test]
-    fn test_variable_definition() {
-        let scope = Scope::new();
-
-        let result = run_function(
-            &FunctionNode {
-                name: "test".into(),
-                parameters: vec![],
-                return_type: Some(Type::Int),
-                block: vec![
-                    BlockNode::VariableDefinition {
-                        name: "x".into(),
-                        type_name: Type::Int,
-                        value: ExpressionNode::Term(TermNode::Integer(5)),
-                    },
-                    BlockNode::Return(
-                        ExpressionNode::Term(TermNode::Variable("x".into()))
-                    )
-                ],
-            },
-            &scope,
-            vec![],
-        ).expect("Error while defining simple variable");
-
-        assert_eq!(result, Some(Value::Int(5)));
-
-        run_function(
-            &FunctionNode {
-                name: "test".into(),
-                parameters: vec![],
-                return_type: Some(Type::String),
-                block: vec![
-                    BlockNode::VariableDefinition {
-                        name: "x".into(),
-                        type_name: Type::Int,
-                        value: ExpressionNode::Term(TermNode::String("test".into())),
-                    },
-                    BlockNode::Return(
-                        ExpressionNode::Term(TermNode::Variable("x".into()))
-                    )
-                ],
-            },
-            &scope,
-            vec![],
-        ).expect_err("The value of the variable should be required to be int");
-    }
-
-    #[test]
-    fn test_variable_assignment() {
-        let scope = Scope::new();
-
-        let result = run_function(
-            &FunctionNode {
-                name: "test".into(),
-                parameters: vec![],
-                return_type: Some(Type::Int),
-                block: vec![
-                    BlockNode::VariableDefinition {
-                        name: "x".into(),
-                        type_name: Type::Int,
-                        value: ExpressionNode::Term(TermNode::Integer(3)),
-                    },
-                    BlockNode::Assignment {
-                        lhs: "x".into(),
-                        rhs: ExpressionNode::Term(TermNode::Integer(5)),
-                    },
-                    BlockNode::Return(
-                        ExpressionNode::Term(TermNode::Variable("x".into()))
-                    )
-                ],
-            },
-            &scope,
-            vec![],
-        ).expect("Error with assignment");
-
-        assert_eq!(result, Some(Value::Int(5)));
     }
 }

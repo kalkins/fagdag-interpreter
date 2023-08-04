@@ -2,6 +2,7 @@ mod scope;
 mod function;
 mod value;
 mod expression;
+mod block;
 
 #[cfg(test)]
 mod test;
