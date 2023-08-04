@@ -10,34 +10,17 @@ pub fn run_expression(expr: &ExpressionNode, scope: &Scope) -> Result<Value, Str
             
             if lhs.ast_type() != rhs.ast_type() {
                 Err(format!("Invalid operand types {} and {}", lhs.ast_type(), rhs.ast_type()))
-            }
-            else {
+            } else {
                 match verb {
                     BinaryVerb::Plus => {
-                        match (&lhs, &rhs) {
-                            (Value::Int(x), Value::Int(y)) => Ok(Value::Int(x + y)),
-                            (Value::String(x), Value::String(y)) => Ok(Value::String(x.clone() + y)),
-                            (Value::Bool(x), Value::Bool(y)) => Ok(Value::Bool(*x && *y)),
-                            _ => Err(format!("Cannot add {} and {}", lhs, rhs))
-                        }
+                        lhs + rhs
                     },
                     BinaryVerb::Minus => {
-                        match (&lhs, &rhs) {
-                        (Value::Int(x), Value::Int(y)) => Ok(Value::Int(x-y)),
-                            // (Value::String(x), Value::String(y)) => Ok(Value::String(x+y))
-                            // (Value::Bool(x), Value::Bool(y)) => Ok(Value::Bool(x+y))
-                            _ => Err(format!("Cannot subtract {} and {}", lhs, rhs))
-                        }
+                        lhs - rhs
                     },
                     BinaryVerb::Compare => {
-                        match (&lhs, &rhs) {
-                            (Value::Int(x), Value::Int(y)) => Ok(Value::Bool(x==y)),
-                            (Value::String(x), Value::String(y)) => Ok(Value::Bool(x==y)),
-                            (Value::Bool(x), Value::Bool(y)) => Ok(Value::Bool(*x && *y)),
-                            _ => Err(format!("Cannot compare {} and {}", lhs, rhs))                        
-                        }
+                        lhs.compare(&rhs)
                     }
-                    _ => Err(format!("Invalid operand"))
                 }
             }
 
