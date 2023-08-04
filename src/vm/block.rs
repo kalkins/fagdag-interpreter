@@ -37,6 +37,15 @@ pub fn run_block(block: &Vec<BlockNode>, parent: &Scope) -> Result<Option<Value>
             BlockNode::Expression(expr) => {
                 run_expression(expr, &scope)?;
             },
+            BlockNode::Block(nested) => {
+                match run_block(nested, &scope)? {
+                    Some(x) => {
+                        return_value = Some(x);
+                        break;
+                    },
+                    None => {}
+                }
+            },
             BlockNode::Return(expr) => {
                 return_value = Some(run_expression(expr, &scope)?);
                 break;
@@ -112,5 +121,65 @@ mod test {
         ).expect("Error with assignment");
 
         assert_eq!(result, Some(Value::Int(5)));
+    }
+
+    #[test]
+    fn test_simple_nested_block() {
+        let scope = Scope::new();
+
+        let result = run_block(
+            &vec![
+                BlockNode::Block(vec![]),
+            ],
+            &scope,
+        ).expect("Error with nested block");
+
+        assert_eq!(result, None)
+    }
+
+    #[test]
+    fn test_complex_nested_block() {
+        let scope = Scope::new();
+
+        let result = run_block(
+            &vec![
+                BlockNode::VariableDefinition {
+                    name: "x".into(),
+                    type_name: Type::Int,
+                    value: ExpressionNode::Term(TermNode::Integer(3)),
+                },
+                BlockNode::Block(vec![
+                    BlockNode::VariableDefinition {
+                        name: "y".into(),
+                        type_name: Type::Int,
+                        value: ExpressionNode::Term(TermNode::Variable("x".to_string())),
+                    },
+                ])
+            ],
+            &scope,
+        ).expect("Error with nested block");
+
+        assert_eq!(result, None)
+    }
+
+    #[test]
+    fn test_return_from_nested_block() {
+        let scope = Scope::new();
+
+        let result = run_block(
+            &vec![
+                BlockNode::Block(vec![
+                    BlockNode::Return(
+                        ExpressionNode::Term(TermNode::Integer(1))
+                    )
+                ]),
+                BlockNode::Return(
+                    ExpressionNode::Term(TermNode::Integer(2))
+                )
+            ],
+            &scope,
+        ).expect("Error with nested block");
+
+        assert_eq!(result, Some(Value::Int(1)))
     }
 }

@@ -1,4 +1,5 @@
 use pest::iterators::Pair;
+use crate::parser::utils::parse_all;
 use super::error::ParseError;
 use super::Rule;
 
@@ -20,8 +21,6 @@ impl<'pest, T: FromPest<'pest>> ParsePest<T> for Pair<'pest, Rule> {
 impl<'pest, T: FromPest<'pest>> FromPest<'pest> for Vec<T> {
     #[track_caller]
     fn from_pest(pair: Pair<'pest, Rule>) -> Result<Self, ParseError> {
-        ParseError::merge(
-            pair.into_inner().map(|p| p.parse())
-        )
+        parse_all(&mut pair.into_inner())
     }
 }

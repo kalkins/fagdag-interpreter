@@ -1,6 +1,5 @@
-use crate::parser::ast::{BlockNode, FunctionNode};
+use crate::parser::ast::FunctionNode;
 use crate::vm::block::run_block;
-use super::expression::run_expression;
 use super::scope::Scope;
 use super::value::Value;
 
@@ -25,10 +24,8 @@ pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -
             }
         }
 
-        let mut return_value = run_block(&function.block, &scope)?;
-
         // Handle the return value
-        if let Some(value) = return_value {
+        if let Some(value) = run_block(&function.block, &scope)? {
             if let Some(return_type) = &function.return_type {
                 if value.ast_type() == *return_type {
                     Ok(Some(value))

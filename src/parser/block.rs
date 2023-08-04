@@ -1,4 +1,5 @@
 use pest::iterators::Pair;
+use crate::parser::utils::parse_all;
 use super::ast::BlockNode;
 use super::error::ParseError;
 use super::from_pest::FromPest;
@@ -29,6 +30,11 @@ impl FromPest<'_> for BlockNode {
                         rhs: parse_next(&mut inner, &pair)?,
                     }
                 )
+            },
+            Rule::block => {
+                let mut inner = pair.clone().into_inner();
+                //Ok(BlockNode::Block(parse_next(&mut inner)?.unwrap_or(vec![])))
+                Ok(BlockNode::Block(parse_all(&mut inner)?))
             },
             Rule::return_stmt => {
                 let mut inner = pair.clone().into_inner();
@@ -106,6 +112,69 @@ mod test {
                     TermNode::Integer(5)
                 )
             ),
+        ];
+
+        assert_eq!(nodes, expected);
+    }
+
+    #[test]
+    fn test_nested() {
+        let nodes = parse_block("
+            {
+            }
+        ");
+
+        let expected = vec![
+            BlockNode::Block(vec![]),
+        ];
+
+        assert_eq!(nodes, expected);
+
+        let nodes = parse_block("
+            var x: int = 5;
+            {
+                var y: int = 10;
+                {
+                    x = y;
+                }
+
+                return x;
+            }
+        ");
+
+        let expected = vec![
+            BlockNode::VariableDefinition {
+                name: "x".into(),
+                type_name: Type::Int,
+                value: ExpressionNode::Term(
+                    TermNode::Integer(5)
+                )
+            },
+
+            BlockNode::Block(vec![
+                BlockNode::VariableDefinition {
+                    name: "y".into(),
+                    type_name: Type::Int,
+                    value: ExpressionNode::Term(
+                        TermNode::Integer(10)
+                    )
+                },
+
+                BlockNode::Block(vec![
+                    BlockNode::Assignment {
+                        lhs: "x".into(),
+                        rhs: ExpressionNode::Term(
+                            TermNode::Variable("y".into())
+                        )
+                    }
+                ]),
+
+                BlockNode::Return(
+                    ExpressionNode::Term(
+                        TermNode::Variable("x".into())
+                    )
+                ),
+            ]),
         ];
 
         assert_eq!(nodes, expected);

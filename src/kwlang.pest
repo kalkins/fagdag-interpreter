@@ -15,7 +15,7 @@ root                    = _{ func }
 
     type_decl           =  { var_name ~ ":" ~ type_name }
 
-    block               =  { "{" ~ (stmt ~ ";")* ~ "}" }
+    block               =  { "{" ~ (stmt ~ ";" | block)* ~ "}" }
       stmt              = _{ def_var | assignment | return_stmt | expr_stmt }
         def_var         =  { "var" ~ type_decl ~ "=" ~ expr}
         assignment      =  { var_name ~ "=" ~ expr }

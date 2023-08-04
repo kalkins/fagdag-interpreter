@@ -24,6 +24,7 @@ pub enum BlockNode {
     VariableDefinition { name: Ident, type_name: Type, value: ExpressionNode },
     Assignment { lhs: Ident, rhs: ExpressionNode },
     Expression(ExpressionNode),
+    Block(Vec<BlockNode>),
     Return(ExpressionNode),
 }
 

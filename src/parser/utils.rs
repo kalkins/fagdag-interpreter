@@ -27,3 +27,10 @@ pub fn parse_next_option<'pest, T: FromPest<'pest>>(inner: &mut Pairs<'pest, Rul
         None => Ok(None),
     }
 }
+
+#[track_caller]
+pub fn parse_all<'pest, T: FromPest<'pest>>(inner: &mut Pairs<'pest, Rule>) -> Result<Vec<T>, ParseError> {
+    ParseError::merge(
+        inner.map(|p| p.parse())
+    )
+}
