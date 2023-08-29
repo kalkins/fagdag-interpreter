@@ -35,6 +35,18 @@ pub fn run_block(block: &Vec<BlockNode>, parent: &Scope) -> Result<Option<Value>
             BlockNode::Expression(expr) => {
                 run_expression(expr, &scope)?;
             },
+            BlockNode::IfStatement { condition, block } => {
+                match run_expression(condition, &scope)? {
+                    Value::Bool(result) => {
+                        if result {
+                            return_value = run_block(block, &scope)?
+                        }
+                    }
+                    x => {
+                        Err(format!("Invalid condition result {x} in if-statement"))?
+                    }
+                }
+            }
             BlockNode::Block(nested) => {
                 return_value = run_block(nested, &scope)?;
             },
@@ -176,5 +188,29 @@ mod test {
         ).expect("Error with nested block");
 
         assert_eq!(result, Some(Value::Int(1)))
+    }
+
+    #[test]
+    fn test_if_statement() {
+        let scope = Scope::new();
+
+        let result = run_block(
+            &vec![
+                BlockNode::IfStatement {
+                    condition: ExpressionNode::Term(TermNode::Boolean(true)),
+                    block: vec![
+                        BlockNode::Return(
+                            ExpressionNode::Term(TermNode::Integer(2))
+                        ),
+                    ],
+                },
+                BlockNode::Return(
+                    ExpressionNode::Term(TermNode::Integer(0))
+                ),
+            ],
+            &scope,
+        ).expect("Error with nested block");
+
+        assert_eq!(result, Some(Value::Int(2)))
     }
 }

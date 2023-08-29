@@ -25,6 +25,7 @@ pub enum BlockNode {
     Assignment { lhs: Ident, rhs: ExpressionNode },
     Expression(ExpressionNode),
     Block(Vec<BlockNode>),
+    IfStatement { condition: ExpressionNode, block: Vec<BlockNode> },
     Return(ExpressionNode),
 }
 

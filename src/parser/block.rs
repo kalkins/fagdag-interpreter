@@ -44,6 +44,16 @@ impl FromPest<'_> for BlockNode {
                 let mut inner = pair.clone().into_inner();
 
                 Ok(BlockNode::Expression(parse_next(&mut inner, &pair)?))
+            },
+            Rule::if_statement => {
+                let mut inner = pair.clone().into_inner();
+
+                Ok(
+                    BlockNode::IfStatement {
+                        condition: parse_next(&mut inner, &pair)?,
+                        block: parse_next(&mut inner, &pair)?,
+                    }
+                )
             }
             rule => Err(ParseError::wrong_rule(&pair, rule))
         }
@@ -175,6 +185,43 @@ mod test {
                     )
                 ),
             ]),
+        ];
+
+        assert_eq!(nodes, expected);
+    }
+
+    #[test]
+    fn test_if_statement() {
+        let nodes = parse_block("
+            var x: int = 5;
+            if (x == 5) {
+                return x;
+            }
+        ");
+
+        let expected = vec![
+            BlockNode::VariableDefinition {
+                name: "x".into(),
+                type_name: Type::Int,
+                value: ExpressionNode::Term(
+                    TermNode::Integer(5)
+                )
+            },
+
+            BlockNode::IfStatement {
+                condition: ExpressionNode::BinaryOperation {
+                    verb: BinaryVerb::Compare,
+                    lhs: ExpressionNode::Term(TermNode::Variable("x".to_string())).into(),
+                    rhs: ExpressionNode::Term(TermNode::Integer(5)).into(),
+                },
+                block: vec![
+                    BlockNode::Return(
+                        ExpressionNode::Term(
+                            TermNode::Variable("x".into())
+                        )
+                    ),
+                ],
+            },
         ];
 
         assert_eq!(nodes, expected);
