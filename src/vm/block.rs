@@ -38,19 +38,16 @@ pub fn run_block(block: &Vec<BlockNode>, parent: &Scope) -> Result<Option<Value>
                 run_expression(expr, &scope)?;
             },
             BlockNode::Block(nested) => {
-                match run_block(nested, &scope)? {
-                    Some(x) => {
-                        return_value = Some(x);
-                        break;
-                    },
-                    None => {}
-                }
+                return_value = run_block(nested, &scope)?;
             },
             BlockNode::Return(expr) => {
                 return_value = Some(run_expression(expr, &scope)?);
-                break;
             }
         };
+
+        if return_value.is_some() {
+            break;
+        }
     }
 
     Ok(return_value)
