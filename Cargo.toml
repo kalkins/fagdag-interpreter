@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 from-pest = "0.3.2"
-itertools = "0.10.5"
+itertools = "0.11.0"
 pest = { version = "2.5.7", features = ["pretty-print"]}
 pest_derive = "2.5.7"
