@@ -14,12 +14,10 @@ pub fn run_block(block: &Vec<BlockNode>, parent: &Scope) -> Result<Option<Value>
                     let v = run_expression(value, &scope)?;
                     if v.ast_type() == *type_name {
                         scope.add_variable(name, v);
-                    }
-                    else {
+                    } else {
                         Err(format!("Invalid variable definition. Mismatch types {} and {}", v.ast_type(), type_name))?;
                     }
-                }
-                else {
+                } else {
                     Err(format!("Definition of {} shadows previously declared variable", name))?;
                 }
 
@@ -27,11 +25,11 @@ pub fn run_block(block: &Vec<BlockNode>, parent: &Scope) -> Result<Option<Value>
             BlockNode::Assignment { lhs, rhs } => {
                 let v = scope.get_variable(lhs).ok_or("Hello".to_string())?;
                 let e = run_expression(rhs, &scope)?;
+
                 if e.ast_type() == v.ast_type() {
                     scope.add_variable(lhs, e);
-                }
-                else {
-                    Err(format!("Mismatch in assigment"))?;
+                } else {
+                    Err("Mismatch in assigment".to_string())?;
                 }
             },
             BlockNode::Expression(expr) => {
