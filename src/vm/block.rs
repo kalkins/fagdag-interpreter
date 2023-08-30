@@ -3,15 +3,14 @@ use crate::vm::expression::run_expression;
 use crate::vm::scope::Scope;
 use crate::vm::value::Value;
 
-pub fn run_block(block: &Vec<BlockNode>, parent: &Scope) -> Result<Option<Value>, String> {
-    let mut scope = Scope::from_parent(parent);
+pub fn run_block(block: &Vec<BlockNode>, scope: &mut Scope) -> Result<Option<Value>, String> {
     let mut return_value = None;
 
     for node in block {
         match node {
             BlockNode::VariableDefinition { name, type_name, value } => {
                 if scope.get_variable(name).is_none() {
-                    let v = run_expression(value, &scope)?;
+                    let v = run_expression(value, scope)?;
                     if v.ast_type() == *type_name {
                         scope.add_variable(name, v);
                     } else {
@@ -24,10 +23,10 @@ pub fn run_block(block: &Vec<BlockNode>, parent: &Scope) -> Result<Option<Value>
             },
             BlockNode::Assignment { lhs, rhs } => {
                 let v = scope.get_variable(lhs).ok_or("Hello".to_string())?;
-                let e = run_expression(rhs, &scope)?;
+                let e = run_expression(rhs, scope)?;
 
                 if e.ast_type() == v.ast_type() {
-                    scope.add_variable(lhs, e);
+                    scope.set_variable(lhs, e)?;
                 } else {
                     Err("Mismatch in assigment".to_string())?;
                 }
@@ -39,7 +38,7 @@ pub fn run_block(block: &Vec<BlockNode>, parent: &Scope) -> Result<Option<Value>
                 match run_expression(condition, &scope)? {
                     Value::Bool(result) => {
                         if result {
-                            return_value = run_block(block, &scope)?
+                            return_value = scope.subscope(|s| run_block(block, s))?
                         }
                     }
                     x => {
@@ -48,10 +47,12 @@ pub fn run_block(block: &Vec<BlockNode>, parent: &Scope) -> Result<Option<Value>
                 }
             }
             BlockNode::Block(nested) => {
-                return_value = run_block(nested, &scope)?;
+                return_value = scope.subscope(|s| run_block(nested, s))?;
             },
             BlockNode::Return(expr) => {
-                return_value = Some(run_expression(expr, &scope)?);
+                return_value = Some(
+                    scope.subscope(|s| run_expression(expr, s))?
+                );
             }
         };
 
@@ -65,14 +66,14 @@ pub fn run_block(block: &Vec<BlockNode>, parent: &Scope) -> Result<Option<Value>
 
 #[cfg(test)]
 mod test {
-    use crate::parser::ast::{BlockNode, ExpressionNode, TermNode, Type};
+    use crate::parser::ast::{BinaryVerb, BlockNode, ExpressionNode, TermNode, Type};
     use crate::vm::block::run_block;
     use crate::vm::scope::Scope;
     use crate::vm::value::Value;
 
     #[test]
     fn test_variable_definition() {
-        let scope = Scope::new();
+        let mut scope = Scope::new();
 
         let result = run_block(
             &vec![
@@ -85,7 +86,7 @@ mod test {
                     ExpressionNode::Term(TermNode::Variable("x".into()))
                 )
             ],
-            &scope,
+            &mut scope,
         ).expect("Error while defining simple variable");
 
         assert_eq!(result, Some(Value::Int(5)));
@@ -101,13 +102,13 @@ mod test {
                     ExpressionNode::Term(TermNode::Variable("x".into()))
                 )
             ],
-            &scope,
+            &mut scope,
         ).expect_err("The value of the variable should be required to be int");
     }
 
     #[test]
     fn test_variable_assignment() {
-        let scope = Scope::new();
+        let mut scope = Scope::new();
 
         let result = run_block(
             &vec![
@@ -124,7 +125,7 @@ mod test {
                     ExpressionNode::Term(TermNode::Variable("x".into()))
                 )
             ],
-            &scope,
+            &mut scope,
         ).expect("Error with assignment");
 
         assert_eq!(result, Some(Value::Int(5)));
@@ -132,13 +133,13 @@ mod test {
 
     #[test]
     fn test_simple_nested_block() {
-        let scope = Scope::new();
+        let mut scope = Scope::new();
 
         let result = run_block(
             &vec![
                 BlockNode::Block(vec![]),
             ],
-            &scope,
+            &mut scope,
         ).expect("Error with nested block");
 
         assert_eq!(result, None)
@@ -146,7 +147,7 @@ mod test {
 
     #[test]
     fn test_complex_nested_block() {
-        let scope = Scope::new();
+        let mut scope = Scope::new();
 
         let result = run_block(
             &vec![
@@ -163,7 +164,7 @@ mod test {
                     },
                 ])
             ],
-            &scope,
+            &mut scope,
         ).expect("Error with nested block");
 
         assert_eq!(result, None)
@@ -171,7 +172,7 @@ mod test {
 
     #[test]
     fn test_return_from_nested_block() {
-        let scope = Scope::new();
+        let mut scope = Scope::new();
 
         let result = run_block(
             &vec![
@@ -184,7 +185,7 @@ mod test {
                     ExpressionNode::Term(TermNode::Integer(2))
                 )
             ],
-            &scope,
+            &mut scope,
         ).expect("Error with nested block");
 
         assert_eq!(result, Some(Value::Int(1)))
@@ -192,7 +193,7 @@ mod test {
 
     #[test]
     fn test_if_statement() {
-        let scope = Scope::new();
+        let mut scope = Scope::new();
 
         let result = run_block(
             &vec![
@@ -208,9 +209,45 @@ mod test {
                     ExpressionNode::Term(TermNode::Integer(0))
                 ),
             ],
-            &scope,
+            &mut scope,
         ).expect("Error with nested block");
 
         assert_eq!(result, Some(Value::Int(2)))
+    }
+
+    #[test]
+    fn test_complex_if() {
+        let mut scope = Scope::new();
+
+        let result = run_block(
+            &vec![
+                BlockNode::VariableDefinition {
+                    name: "x".into(),
+                    type_name: Type::Int,
+                    value: ExpressionNode::Term(
+                        TermNode::Integer(0)
+                    ),
+                },
+                BlockNode::IfStatement {
+                    condition: ExpressionNode::BinaryOperation {
+                        verb: BinaryVerb::Compare,
+                        lhs: Box::new(ExpressionNode::Term(TermNode::Variable("x".into()))),
+                        rhs: Box::new(ExpressionNode::Term(TermNode::Integer(0))),
+                    },
+                    block: vec![
+                        BlockNode::Assignment {
+                            lhs: "x".into(),
+                            rhs: ExpressionNode::Term(TermNode::Integer(5)),
+                        }
+                    ],
+                },
+                BlockNode::Return(
+                    ExpressionNode::Term(TermNode::Variable("x".into()))
+                ),
+            ],
+            &mut scope,
+        ).expect("Error with nested block");
+
+        assert_eq!(result, Some(Value::Int(5)))
     }
 }

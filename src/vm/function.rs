@@ -3,9 +3,7 @@ use crate::vm::block::run_block;
 use super::scope::Scope;
 use super::value::Value;
 
-pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -> Result<Option<Value>, String> {
-    let mut scope = Scope::from_parent(parent);
-
+pub fn run_function(function: &FunctionNode, scope: &mut Scope, args: Vec<Value>) -> Result<Option<Value>, String> {
     if function.parameters.len() != args.len() {
         Err(format!("Function {} expected {} arguments, got {}", function.name, function.parameters.len(), args.len()))
     } else {
@@ -25,7 +23,7 @@ pub fn run_function(function: &FunctionNode, parent: &Scope, args: Vec<Value>) -
         }
 
         // Handle the return value
-        if let Some(value) = run_block(&function.block, &scope)? {
+        if let Some(value) = scope.subscope(|s| run_block(&function.block, s))? {
             if let Some(return_type) = &function.return_type {
                 if value.ast_type() == *return_type {
                     Ok(Some(value))
@@ -54,7 +52,7 @@ mod test {
 
     #[test]
     fn test_empty_function() {
-        let scope = Scope::new();
+        let mut scope = Scope::new();
 
         run_function(
             &FunctionNode {
@@ -63,14 +61,14 @@ mod test {
                 return_type: None,
                 block: vec![],
             },
-            &scope,
+            &mut scope,
             vec![],
         ).expect("An empty function should be allowed");
     }
 
     #[test]
     fn test_parameter_list() {
-        let scope = Scope::new();
+        let mut scope = Scope::new();
 
         run_function(
             &FunctionNode {
@@ -81,7 +79,7 @@ mod test {
                 return_type: None,
                 block: vec![],
             },
-            &scope,
+            &mut scope,
             vec![
                 Value::Int(0),
             ],
@@ -97,7 +95,7 @@ mod test {
                 return_type: None,
                 block: vec![],
             },
-            &scope,
+            &mut scope,
             vec![
                 Value::Int(0),
                 Value::String("test".into())
@@ -113,7 +111,7 @@ mod test {
                 return_type: None,
                 block: vec![],
             },
-            &scope,
+            &mut scope,
             vec![
                 Value::Int(0),
                 Value::String("test".into())
@@ -130,7 +128,7 @@ mod test {
                 return_type: None,
                 block: vec![],
             },
-            &scope,
+            &mut scope,
             vec![
                 Value::Int(0),
             ],
@@ -145,7 +143,7 @@ mod test {
                 return_type: None,
                 block: vec![],
             },
-            &scope,
+            &mut scope,
             vec![
                 Value::String("".into()),
             ],
@@ -154,7 +152,7 @@ mod test {
 
     #[test]
     fn test_return_value_match_return_type() {
-        let scope = Scope::new();
+        let mut scope = Scope::new();
 
         run_function(
             &FunctionNode {
@@ -167,7 +165,7 @@ mod test {
                     )
                 ],
             },
-            &scope,
+            &mut scope,
             vec![],
         ).expect("Function does not accept correct return value");
 
@@ -182,7 +180,7 @@ mod test {
                     )
                 ],
             },
-            &scope,
+            &mut scope,
             vec![],
         ).expect_err("A function should be required to return the designated return type");
 
@@ -197,7 +195,7 @@ mod test {
                     )
                 ],
             },
-            &scope,
+            &mut scope,
             vec![],
         ).expect_err("A function should be prohibited from returning a value when no return type is specified");
 
@@ -208,7 +206,7 @@ mod test {
                 return_type: Some(Type::Int),
                 block: vec![],
             },
-            &scope,
+            &mut scope,
             vec![],
         ).expect_err("A function should be prohibited from not returning a value when a return type is specified");
     }

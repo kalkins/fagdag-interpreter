@@ -1,11 +1,11 @@
 use std::fmt::{Display, Formatter};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Program {
     pub nodes: Vec<FunctionNode>
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct FunctionNode {
     pub name: Ident,
     pub parameters: Vec<FunctionParam>,
@@ -13,13 +13,13 @@ pub struct FunctionNode {
     pub block: Vec<BlockNode>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct FunctionParam {
     pub name: Ident,
     pub type_name: Type,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum BlockNode {
     VariableDefinition { name: Ident, type_name: Type, value: ExpressionNode },
     Assignment { lhs: Ident, rhs: ExpressionNode },
@@ -29,7 +29,7 @@ pub enum BlockNode {
     Return(ExpressionNode),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ExpressionNode {
     BinaryOperation {
         verb: BinaryVerb,
@@ -39,14 +39,14 @@ pub enum ExpressionNode {
     Term(TermNode),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum BinaryVerb {
     Plus,
     Minus,
     Compare,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TermNode {
     Variable(Ident),
     Boolean(bool),
@@ -54,7 +54,7 @@ pub enum TermNode {
     String(String),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Type {
     Int,
     Bool,
