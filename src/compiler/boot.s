@@ -17,6 +17,8 @@ _start:
 .option pop
     la      sp, _stack_end
 
+    la      tp, _head_start
+
     call    init_uart
     #la      a0, _BOOT_MESSAGE
     #call    printf

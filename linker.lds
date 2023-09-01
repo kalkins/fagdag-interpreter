@@ -50,6 +50,6 @@ SECTIONS
 	PROVIDE(_stack_end = _bss_end + 0x80000);
 	PROVIDE(_memory_start = ORIGIN(ram));
 	PROVIDE(_memory_end = ORIGIN(ram) + LENGTH(ram));
-	PROVIDE(_heap_start = _stack);
-	PROVIDE(_heap_size = _memory_end - _stack);
+	PROVIDE(_heap_start = _stack_end);
+	PROVIDE(_heap_size = _memory_end - _heap_start);
 }
