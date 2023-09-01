@@ -88,7 +88,7 @@ fn main() {
 fn run_compiled(path: &Path) {
     let bin_path = path.with_extension("bin");
 
-    let gcc = vec!["riscv64-elf-gcc"]
+    let gcc = vec!["riscv64-elf-gcc", "riscv64-unknown-elf-gcc"]
         .into_iter()
         .find(|c|
             Command::new("which")
