@@ -54,7 +54,7 @@ pub enum TermNode {
     String(String),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Type {
     Int,
     Bool,
